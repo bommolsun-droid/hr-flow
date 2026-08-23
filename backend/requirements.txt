@@ -1,0 +1,4 @@
+Faker==40.37.0
+PyMySQL==1.2.0
+python-dotenv==1.2.3
+tzdata==2026.3
