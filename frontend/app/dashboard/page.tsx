@@ -12,6 +12,9 @@ import {
   ResponsiveContainer,
   Cell,
   ReferenceLine,
+  PieChart,
+  Pie,
+  Legend,
 } from "recharts";
 import { ChevronDown, ShieldAlert } from "lucide-react";
 
@@ -32,6 +35,7 @@ type KPIData = {
 };
 
 const WARNING_THRESHOLD = 20;
+const PIE_COLORS = ["#6366f1", "#818cf8", "#a5b4fc", "#c7d2fe", "#e0e7ff", "#eef2ff"];
 
 export default function DashboardPage() {
   const [data, setData] = useState<KPIData | null>(null);
@@ -118,57 +122,8 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* 표 + 차트 */}
+      {/* 차트 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-          <p className="text-sm font-semibold text-gray-800 mb-4">부서별 퇴사 현황</p>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-gray-400 border-b border-gray-100">
-                <th className="py-2.5 font-medium w-10">#</th>
-                <th className="py-2.5 font-medium">부서</th>
-                <th className="py-2.5 font-medium">퇴사자</th>
-                <th className="py-2.5 font-medium">퇴사율</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rankedDepartments.map((dept, index) => {
-                const isWarning = dept.resign_rate >= WARNING_THRESHOLD;
-                return (
-                  <tr
-                    key={dept.department_name}
-                    className="border-b border-gray-50 last:border-0"
-                  >
-                    <td className="py-3 text-gray-400">{index + 1}</td>
-                    <td className="py-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-gray-900 font-medium">
-                          {dept.department_name}
-                        </span>
-                        {isWarning && (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-red-50 text-red-600">
-                            경고
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="py-3 text-gray-500">{dept.resigned}명</td>
-                    <td className="py-3">
-                      <span
-                        className={`font-semibold ${
-                          isWarning ? "text-red-600" : "text-gray-700"
-                        }`}
-                      >
-                        {dept.resign_rate}%
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
           <p className="text-sm font-semibold text-gray-800 mb-4">
             부서별 퇴사율 분포
@@ -221,6 +176,89 @@ export default function DashboardPage() {
             </BarChart>
           </ResponsiveContainer>
         </div>
+
+        {/* 부서별 인원 분포 도넛차트 */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+          <p className="text-sm font-semibold text-gray-800 mb-4">부서별 인원 분포</p>
+          <ResponsiveContainer width="100%" height={280}>
+            <PieChart>
+              <Pie
+                data={rankedDepartments}
+                dataKey="total"
+                nameKey="department_name"
+                innerRadius={55}
+                outerRadius={85}
+                paddingAngle={2}
+              >
+                {rankedDepartments.map((dept, i) => (
+                  <Cell key={dept.department_name} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip
+                formatter={(value) => [`${value}명`, "인원"]}
+                contentStyle={{ borderRadius: 8, border: "1px solid #e5e7eb", fontSize: 13 }}
+              />
+              <Legend
+                layout="vertical"
+                align="right"
+                verticalAlign="middle"
+                iconType="circle"
+                iconSize={8}
+                formatter={(value) => <span className="text-xs text-gray-600">{value}</span>}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* 부서별 퇴사 현황 표 */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-6">
+        <p className="text-sm font-semibold text-gray-800 mb-4">부서별 퇴사 현황</p>
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-left text-gray-400 border-b border-gray-100">
+              <th className="py-2.5 font-medium w-10">#</th>
+              <th className="py-2.5 font-medium">부서</th>
+              <th className="py-2.5 font-medium">퇴사자</th>
+              <th className="py-2.5 font-medium">퇴사율</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rankedDepartments.map((dept, index) => {
+              const isWarning = dept.resign_rate >= WARNING_THRESHOLD;
+              return (
+                <tr
+                  key={dept.department_name}
+                  className="border-b border-gray-50 last:border-0"
+                >
+                  <td className="py-3 text-gray-400">{index + 1}</td>
+                  <td className="py-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-900 font-medium">
+                        {dept.department_name}
+                      </span>
+                      {isWarning && (
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-red-50 text-red-600">
+                          경고
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="py-3 text-gray-500">{dept.resigned}명</td>
+                  <td className="py-3">
+                    <span
+                      className={`font-semibold ${
+                        isWarning ? "text-red-600" : "text-gray-700"
+                      }`}
+                    >
+                      {dept.resign_rate}%
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
 
       {/* 하단 경고 배너 */}

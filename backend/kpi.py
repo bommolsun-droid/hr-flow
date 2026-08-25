@@ -51,6 +51,32 @@ def get_kpi_summary():
         "by_department": by_department
     }
 
+def get_employee_list():
+    connection = get_connection()
+
+    query = """
+        SELECT
+            e.employee_id,
+            e.name,
+            d.department_name,
+            e.position,
+            e.hire_date,
+            e.employment_status
+        FROM employees e
+        JOIN departments d ON e.department_id = d.department_id
+        ORDER BY e.employee_id
+    """
+    df = pd.read_sql(query, connection)
+    connection.close()
+
+    # 날짜(Timestamp) 타입을 문자열로 변환 (JSON 직렬화를 위해)
+    df["hire_date"] = df["hire_date"].astype(str)
+
+    return df.to_dict(orient="records")
+
+
 if __name__ == "__main__":
     result = get_kpi_summary()
     print(result)
+
+

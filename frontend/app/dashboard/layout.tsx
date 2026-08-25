@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Sparkles } from "lucide-react";
+import { LayoutDashboard, Sparkles, Users } from "lucide-react";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   const menus = [
     { href: "/dashboard", label: "대시보드", icon: LayoutDashboard },
+    { href: "/dashboard/employees", label: "직원 조회", icon: Users },
     { href: "/dashboard/ai-report", label: "AI 리포트", icon: Sparkles },
   ];
 
